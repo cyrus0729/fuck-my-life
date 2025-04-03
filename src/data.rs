@@ -14,7 +14,7 @@ impl Default for Wawa {
         Self { 
             cash: Decimal::new(0.0), 
             wawas_clicked: Decimal::new(0.0),
-            max_wawas: 1, 
+            max_wawas: 10, 
             wawa_count: 0,
             wawapos: Default::default()}
     }
