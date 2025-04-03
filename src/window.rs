@@ -2,6 +2,7 @@
 use crate::data::Wawa;
 use eframe::{egui, App};
 use break_infinity::{self, Decimal};
+use egui::vec2;
 
 
 impl Wawa {
@@ -59,14 +60,14 @@ impl App for Wawa {
             });
 
             egui::Window::new("wawa containment chamber").fixed_size(egui::vec2(500.0,500.0)).show(ctx, |ui| {
-                let wawa = egui::Image::new(egui::include_image!("../assets/icon.png"));//.max_size(egui::Vec2::new(25.0,25.0));
+                let wawa = egui::Image::new(egui::include_image!("../assets/icon.png")).fit_to_exact_size(vec2(25.0,25.0));
                 while self.wawa_count < self.max_wawas {
                     let randx = rand::random_range(25.0..475.0);
                     let randy = rand::random_range(25.0..475.0);
                     // ui.put(egui::Rect::from_pos(egui::Pos2::new(randx, randy)),wawa.clone()); 
                     //ui.put(egui::Rect::from_pos(egui::Pos2::new(100.0,100.0)),wawa2.clone()); 
                     let wawa2 = egui::ImageButton::new(wawa.clone());
-                    ui.add(wawa2); // why isnt this working?
+                    ui.put(egui::Rect::from_pos(egui::Pos2::new(100.0,100.0)),wawa2); // why isnt this working?
                     self.wawa_count += 1
                 }
                 ui.set_width(ui.available_width());
