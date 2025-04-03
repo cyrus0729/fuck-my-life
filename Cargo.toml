@@ -1,0 +1,12 @@
+[package]
+name = "wawaidle"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+break_infinity = "0.4.0"
+eframe = "0.31.1"
+egui = "0.31.1"
+rand = "0.9.0"
+egui_extras = { version = "*", features = ["all_loaders"] }
+image = { version = "0.25", features = ["jpeg", "png"] }
