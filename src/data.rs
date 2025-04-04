@@ -8,6 +8,7 @@ pub struct Wawa {
     pub max_wawas: usize,
     pub wawapos: Vec<((f32, f32),(f32,f32))>, //pos x,y and vel x,y
     pub click_pos: Option<(f32, f32)>,
+    pub window_pos: egui::Pos2,
 }
 
 impl Default for Wawa {
@@ -18,6 +19,7 @@ impl Default for Wawa {
             max_wawas: 10, 
             wawapos: Default::default(),
             click_pos: Default::default(),
+            window_pos: Default::default(),
         }
     }
 }

@@ -8,8 +8,8 @@ use data::Wawa;
 fn create_window() -> eframe::Result {
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1920.0,1080.0])
-            .with_min_inner_size([640.0,480.0])
+            .with_inner_size([1024.,768.])
+            .with_min_inner_size([640.,480.])
             .with_icon(
                 // NOTE: Adding an icon is optional
                 eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon.png")[..])
