@@ -8,8 +8,12 @@ pub struct Wawa {
     pub max_wawas: usize,
     pub abswawapos: Vec<((f32, f32),(f32,f32))>, //pos x,y and vel x,y
     pub relwawapos: Vec<((f32, f32),(f32,f32))>, //pos x,y and vel x,y
-    pub click_pos: Option<(f32, f32)>,
     pub window_pos: egui::Pos2,
+    pub dragging_start: Option<std::time::Instant>,
+    pub upgrades: [&'static str; 4],
+    pub upgradenames: [&'static str; 4],
+    pub upgradeprices: [Decimal; 4],
+    pub background: &'static str,
 }
 
 impl Default for Wawa {
@@ -20,8 +24,12 @@ impl Default for Wawa {
             max_wawas: 10, 
             abswawapos: Default::default(),
             relwawapos: Default::default(),
-            click_pos: Default::default(),
             window_pos: egui::pos2(0.,0.),
+            dragging_start: Default::default(),
+            upgrades: Default::default(),
+            upgradenames: Default::default(),
+            upgradeprices: Default::default(),
+            background: "../assets/backgrounds/mainbg.png",
         }
     }
 }

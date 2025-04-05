@@ -1,6 +1,7 @@
 // src/main.rs
 pub mod window;
 pub mod data; 
+pub mod global_funcs;
 
 use eframe;
 use data::Wawa;
@@ -8,7 +9,7 @@ use data::Wawa;
 fn create_window() -> eframe::Result {
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1024.,768.])
+            .with_inner_size([1920.,1080.])
             .with_min_inner_size([640.,480.])
             .with_icon(
                 // NOTE: Adding an icon is optional
@@ -28,5 +29,6 @@ fn create_window() -> eframe::Result {
 }
 
 fn main() -> eframe::Result {
+    
     create_window()
 }

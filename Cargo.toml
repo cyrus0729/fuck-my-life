@@ -10,3 +10,5 @@ egui = "0.31.1"
 rand = "0.9.0"
 egui_extras = { version = "*", features = ["all_loaders"] }
 image = { version = "0.25", features = ["jpeg", "png"] }
+soloud = "1.1.0"
+rodio = "0.20.1"

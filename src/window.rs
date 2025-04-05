@@ -1,5 +1,5 @@
 // src/window.rs
-use crate::data::Wawa;
+use crate::{data::Wawa, global_funcs};
 use eframe::{egui, App};
 use break_infinity::{self, Decimal};
 
@@ -21,7 +21,7 @@ impl Wawa {
 impl App for Wawa {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui_extras::install_image_loaders(ctx);
-
+        ctx.request_repaint();
         ctx.add_font(egui::epaint::text::FontInsert::new(
             "neko",
             egui::FontData::from_static(include_bytes!(
@@ -39,16 +39,13 @@ impl App for Wawa {
             ],
         ));
 
-        egui::SidePanel::left("filler").min_width(525.0).show(ctx, |_ui| {});
-        egui::SidePanel::right("menus").min_width(125.0).show(ctx, |ui| {
-            ui.add_sized([120., 40.], egui::Label::new("menus"));
-            ui.add_sized([120., 40.], egui::Button::new("test menu"));
-        });
         let screen_bounds = egui::vec2(500.,500.);
-        let wawa_size = egui::vec2(25.0,25.0);
+        let wawa_size = egui::vec2(50.,50.);
         egui::Window::new("wawa containment chamber")
             .fixed_size(screen_bounds)
             .collapsible(false)
+            .current_pos(self.window_pos)
+            .movable(false)
             .show(ctx, |ui| {
                 let window_rect = ctx.screen_rect();
                 let distance = 1.0;
@@ -56,16 +53,25 @@ impl App for Wawa {
                 let accessible_bounds_y =  screen_bounds.y - (screen_bounds.y - wawa_size.y/2.0)..screen_bounds.y - wawa_size.x/2.0;
                 let velocity_range =-2.0..2.0;
 
+                let mut click_pos = Some((f32::MAX,f32::MAX));
+
                 if ctx.input(|i| i.pointer.button_down(egui::PointerButton::Primary)) {
+                    if self.dragging_start.is_none() { self.dragging_start = Some(std::time::Instant::now());}
                     if let Some(pointer_pos) = ctx.pointer_latest_pos() {
                         if window_rect.contains(pointer_pos) {
-                            if self.window_pos.x > window_rect.min.x && self.window_pos.y > window_rect.min.y && 
-                            self.window_pos.x < window_rect.max.x && self.window_pos.y < window_rect.max.y {
-                                let delta = pointer_pos - self.window_pos; // movement difference
-                                self.window_pos += delta;
+                            if let Some(start_time) = self.dragging_start {
+                                if start_time.elapsed() >= std::time::Duration::from_secs_f32(0.2) {
+                                    if self.window_pos.x < window_rect.max.x - screen_bounds.x - 5.0 && self.window_pos.y < window_rect.max.y - screen_bounds.y - 5.0 {
+                                        let delta = pointer_pos - self.window_pos;
+                                        let _pointer_vec: egui::Vec2 = egui::Vec2::new(pointer_pos.x, pointer_pos.y);
+                                        self.window_pos = self.window_pos + delta ; //+ pointer_vec;
+                                     }
+                                }
                             }
                         }
                     }
+                } else {
+                    self.dragging_start = None;
                 }
 
                 if self.abswawapos.len() < self.max_wawas {
@@ -79,7 +85,7 @@ impl App for Wawa {
                 // check if any click is active
                 if ctx.input(|i| i.pointer.any_click()) {
                     if let Some(pos) = ctx.pointer_latest_pos() {
-                        self.click_pos = Some((pos.x,pos.y)); // store the position of the click
+                        click_pos = Some((pos.x,pos.y)); // store the position of the click
                     }
                 }
 
@@ -106,10 +112,10 @@ impl App for Wawa {
                 for (i,((x, y), (_vx,_vy))) in self.relwawapos.iter_mut().enumerate() {
                     // eprintln!("{:?}: {:?},{:?} {:?},{:?}",i,x,y,vx,vy);
 
-                    if let Some((x1, y1)) = self.click_pos {
+                    if let Some((x1, y1)) = click_pos {
                         // see if the clicked point is close enough to (x, y)
-                        if (x1 - *x).abs() <= wawa_size.x/2.0 && (y1 - *y).abs() <= wawa_size.y/2.0 {
-                            eprint!("wawa clicked");
+                        if (x1 - *x).abs() <= wawa_size.x/1.5 && (y1 - *y).abs() <= wawa_size.y/1.5 {
+                            eprintln!("wawa clicked");
                             ind_to_rmv.push(i);  // Collect the index for removal
                             self.cash += Decimal::new(1.0); 
                             self.wawas_clicked += Decimal::new(1.0);
@@ -121,25 +127,66 @@ impl App for Wawa {
                     .fit_to_exact_size(wawa_size));
                 } // this handles the clicking and rendering
         
-
-
                 // remove clicked wawas
                 for index in ind_to_rmv.iter().rev() {
                     self.abswawapos.remove(*index);
+                    global_funcs::play_sound("../assets/owSfx.ogg");
                 }
                 ui.allocate_space(ui.available_size());
-                eprintln!("cycle completed");
-            });
+        });
+        
 
+        egui::SidePanel::left("filler").exact_width(525.0).show(ctx, |_ui| {});
+        egui::SidePanel::right("menus").exact_width(225.0).show(ctx, |ui| {
+            egui::Image::new(egui::include_image!("../assets/icon.png")).paint_at(ui, ui.ctx().screen_rect());
+            ui.style_mut().text_styles.insert(
+                egui::TextStyle::Body,
+                egui::FontId::new(48.0, eframe::epaint::FontFamily::Proportional),
+            );
+            ui.style_mut().text_styles.insert(
+                egui::TextStyle::Button,
+                egui::FontId::new(48.0, eframe::epaint::FontFamily::Proportional),
+            );
+            ui.label("menus");
+            let _test= ui.button("test menu");
+        });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-
+            ui.style_mut().text_styles.insert(
+                egui::TextStyle::Body,
+                egui::FontId::new(48.0, eframe::epaint::FontFamily::Proportional),
+            );
             ui.vertical(|ui| {
-                ui.label(format!("cash: {:1}", self.cash));
-                ui.label(format!("max wawas: {:1}", self.max_wawas));
-                ui.label(format!("current wawas: {:1}", self.abswawapos.len()));
-                ui.label(format!("wawas clicked: {:1}", self.wawas_clicked))
+                ui.label(format!("cash: {:.1}", self.cash));
+                ui.label(format!("max wawas: {:.1}", self.max_wawas));
+                ui.label(format!("current wawas: {:.1}", self.abswawapos.len()));
+                ui.label(format!("wawas clicked: {:.1}", self.wawas_clicked));
             });
+
+            ui.add(egui::Separator::default());
+
+            egui::Grid::new("upgrade_grid").show(ui, |ui| {
+                ui.style_mut().text_styles.insert(
+                    egui::TextStyle::Body,
+                    egui::FontId::new(48.0, eframe::epaint::FontFamily::Proportional),
+                );
+                ui.style_mut().text_styles.insert(
+                    egui::TextStyle::Button,
+                    egui::FontId::new(48.0, eframe::epaint::FontFamily::Proportional),
+                );
+                ui.label(self.upgradenames[0]);
+                let _net = ui.button(self.upgradenames[0]);
+                ui.end_row();
+            
+                ui.label("Second row, first column");
+                ui.label("Second row, second column");
+                ui.label("Second row, third column");
+                ui.end_row();
+            
+                ui.horizontal(|ui| { ui.label("Same"); ui.label("cell"); });
+                ui.label("Third row, second column");
+                ui.end_row();
+            }); 
 
             // let wawa = egui::ImageButton::new(egui::include_image!("../assets/icon.png"));
             // ui.add(wawa.clone())
