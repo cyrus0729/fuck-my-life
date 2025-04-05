@@ -1,10 +1,7 @@
 // src/main.rs
-pub mod window;
-pub mod data; 
-pub mod global_funcs;
 
 use eframe;
-use data::Wawa;
+use wawaidle::Wawa;
 
 fn create_window() -> eframe::Result {
     let native_options = eframe::NativeOptions {
@@ -29,6 +26,5 @@ fn create_window() -> eframe::Result {
 }
 
 fn main() -> eframe::Result {
-    
     create_window()
 }

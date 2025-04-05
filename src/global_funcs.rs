@@ -1,10 +1,15 @@
 pub fn play_sound(_audio: &'static str) {
-    use soloud::*;
-    let sl = Soloud::default().unwrap();
-    let mut wav = audio::Wav::default();
-    wav.load_mem(include_bytes!("../assets/sfxOw.mp3")).unwrap();
-    sl.play(&wav);
-    while sl.voice_count() > 0 {
-        std::thread::sleep(std::time::Duration::from_millis(100));
-    }
+    use std::fs::File;
+    use std::io::BufReader;
+    use rodio::{Decoder, OutputStream, source::Source};
+    use std::thread;
+
+    // new thread for audio playback
+    thread::spawn(move || {
+        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        let file = File::open("assets/sfxOw.mp3").unwrap();
+        let source = Decoder::new(BufReader::new(file)).unwrap();
+        let _ = stream_handle.play_raw(source.convert_samples());
+        std::thread::sleep(std::time::Duration::from_secs(1));
+    });
 }
